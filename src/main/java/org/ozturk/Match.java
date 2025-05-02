@@ -23,6 +23,7 @@ public class Match {
      * @throws IllegalArgumentException if names are null or equal (ignoring case)
      */
     public Match(String homeTeam, String awayTeam) {
+        // Validates that the teams are non-null and different
         if (homeTeam == null || awayTeam == null || homeTeam.equalsIgnoreCase(awayTeam)) {
             throw new IllegalArgumentException(ERROR_SAME_OR_NULL_TEAMS);
         }
@@ -30,7 +31,7 @@ public class Match {
         this.awayTeam = awayTeam;
         this.homeScore = 0;
         this.awayScore = 0;
-        this.startTime = LocalDateTime.now();
+        this.startTime = LocalDateTime.now(); // Records the current time as the match start time
     }
 
     /**
@@ -41,6 +42,7 @@ public class Match {
      * @throws IllegalArgumentException if scores are negative
      */
     public void updateScore(int homeScore, int awayScore) {
+        // Validates that the scores are non-negative
         if (homeScore < 0 || awayScore < 0) {
             throw new IllegalArgumentException(ERROR_NEGATIVE_SCORE);
         }
