@@ -1,6 +1,11 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.ozturk.Match;
+import org.ozturk.Scoreboard;
 
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -49,6 +54,43 @@ public class ScoreboardTest {
         // Initializes a match with 0 scores
         assertEquals(0, match.getHomeScore());
         assertEquals(0, match.getAwayScore());
+    }
+
+    /**
+     * Tests that starting a match with a null home or away team name
+     * throws an IllegalArgumentException.
+     */
+    @Test
+    void shouldNotAllowNullTeamNamesInScoreboard() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            scoreboard.startMatch(null, "Norway");
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            scoreboard.startMatch("Turkiye", null);
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            scoreboard.startMatch(null, null);
+        });
+    }
+
+    /**
+     * Tests that creating a Match with null home or away team throws an exception.
+     */
+    @Test
+    void shouldNotAllowNullTeamNamesInMatch() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Match(null, "Norway");
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Match("Turkiye", null);
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Match(null, null);
+        });
     }
 
     /**
@@ -122,6 +164,30 @@ public class ScoreboardTest {
     }
 
     /**
+     * Tests that updating a match with negative scores
+     * throws an IllegalArgumentException.
+     */
+    @Test
+    void shouldNotAllowNegativeScores() {
+        scoreboard.startMatch("Turkiye", "Norway");
+
+        // Negative home score
+        assertThrows(IllegalArgumentException.class, () -> {
+            scoreboard.updateScore("Turkiye", "Norway", -1, 0);
+        });
+
+        // Negative away score
+        assertThrows(IllegalArgumentException.class, () -> {
+            scoreboard.updateScore("Turkiye", "Norway", 2, -3);
+        });
+
+        // Both scores negative
+        assertThrows(IllegalArgumentException.class, () -> {
+            scoreboard.updateScore("Turkiye", "Norway", -1, -1);
+        });
+    }
+
+    /**
      * Tests that attempting to update the score of a non-existent match
      * throws an exception.
      */
@@ -175,21 +241,31 @@ public class ScoreboardTest {
      * - Then by most recently started match if scores are equal
      */
     @Test
-    void shouldSortMatchesByTotalScoreThenByRecency() {
+    void shouldSortMatchesByTotalScoreThenByRecency() throws InterruptedException {
         scoreboard.startMatch("Turkiye", "Norway");
         scoreboard.updateScore("Turkiye", "Norway", 5, 0);
+
+        Thread.sleep(1); // To make a time differance
 
         scoreboard.startMatch("Spain", "Brazil");
         scoreboard.updateScore("Spain", "Brazil", 10, 2);
 
+        Thread.sleep(1); // To make a time differance
+
         scoreboard.startMatch("Germany", "France");
         scoreboard.updateScore("Germany", "France", 2, 2);
+
+        Thread.sleep(1); // To make a time differance
 
         scoreboard.startMatch("Uruguay", "Italy");
         scoreboard.updateScore("Uruguay", "Italy", 6, 6);
 
+        Thread.sleep(1); // To make a time differance
+
         scoreboard.startMatch("Argentina", "Australia");
         scoreboard.updateScore("Argentina", "Australia", 3, 1);
+
+        Thread.sleep(1); // To make a time differance
 
         // Get summary ordered by the most recently if the total score is equal
         List<Match> summary = scoreboard.getSummary();
