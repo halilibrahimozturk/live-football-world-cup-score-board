@@ -172,10 +172,16 @@ public class Match {
      * @throws TeamValidationException if the team name is invalid
      */
     private void validateTeamName(String teamName) {
+        if (teamName == null || teamName.trim().isEmpty()) {
+            LOGGER.error(LOG_INVALID_TEAM_NAME, teamName);
+            throw new TeamValidationException(ERROR_SAME_OR_NULL_TEAMS);
+        }
+
         if (!teamName.matches(TEAM_NAME_PATTERN)) {
             LOGGER.error(LOG_INVALID_TEAM_NAME, teamName);
             throw new TeamValidationException(ERROR_INVALID_TEAM_NAME);
         }
+
         if (teamName.length() > MAX_TEAM_NAME_LENGTH) {
             LOGGER.error(LOG_LONG_TEAM_NAME, teamName);
             throw new TeamValidationException(ERROR_LONG_TEAM_NAME);

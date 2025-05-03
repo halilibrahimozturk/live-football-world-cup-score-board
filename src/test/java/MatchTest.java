@@ -20,7 +20,7 @@ public class MatchTest {
     @Test
     void shouldNotAllowNullTeamNamesInMatch() {
         assertThrows(TeamValidationException.class, () -> {
-            new Match(null, "Norway");
+            new Match(" ", "Norway");
         });
 
         assertThrows(TeamValidationException.class, () -> {
