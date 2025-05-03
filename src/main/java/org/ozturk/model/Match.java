@@ -28,6 +28,8 @@ public class Match {
     public static final String ERROR_LONG_TEAM_NAME = "Team name must be less than 50 characters";
 
     // Log messages
+    public static final String LOG_INVALID_TEAM_NAME = "Team names must be alphanumeric and less than 50 characters: {}";
+    public static final String LOG_LONG_TEAM_NAME = "Team name must be less than 50 characters: {}";
     private static final String LOG_MATCH_CREATED = "Match created between '{}' and '{}' at {}";
     private static final String LOG_INVALID_TEAM_NAMES = "Invalid team names: homeTeam='{}', awayTeam='{}'";
     private static final String LOG_SCORE_UPDATE_ATTEMPT = "Attempted to update score with negative value: homeScore={}, awayScore={}";
@@ -109,9 +111,11 @@ public class Match {
 
     private void validateTeamName(String teamName) {
         if (!teamName.matches(TEAM_NAME_PATTERN)) {
+            LOGGER.error(LOG_INVALID_TEAM_NAME, teamName);
             throw new TeamValidationException(ERROR_INVALID_TEAM_NAME);
         }
         if (teamName.length() > MAX_TEAM_NAME_LENGTH) {
+            LOGGER.error(LOG_LONG_TEAM_NAME, teamName);
             throw new TeamValidationException(ERROR_LONG_TEAM_NAME);
         }
     }
