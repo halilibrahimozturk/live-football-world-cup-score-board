@@ -9,6 +9,17 @@ import java.time.LocalDateTime;
 /**
  * Represents a football match between two teams with score tracking and start time.
  * Immutable for team names and start time; mutable only for score updates.
+ * <p>
+ * This class validates the team names, ensures scores are non-negative, and allows
+ * score updates during the match. It logs significant events and errors for debugging.
+ * </p>
+ *
+ * <p>Example usage:</p>
+ * <pre>
+ * Match match = new Match("Team A", "Team B");
+ * match.updateScore(1, 0);
+ * System.out.println(match.getHomeScore()); // 1
+ * </pre>
  *
  * @author Halil Ibrahim Ozturk
  */
@@ -44,6 +55,10 @@ public class Match {
 
     /**
      * Constructs a Match with specified teams and default scores (0-0).
+     * <p>
+     * If the team names are invalid (null, empty, or equal), a {@link TeamValidationException}
+     * is thrown.
+     * </p>
      *
      * @param homeTeam home team name
      * @param awayTeam away team name
@@ -69,6 +84,9 @@ public class Match {
 
     /**
      * Updates the score of the match.
+     * <p>
+     * If either score is negative, an {@link InvalidScoreException} is thrown.
+     * </p>
      *
      * @param homeScore new home team score
      * @param awayScore new away team score
@@ -85,30 +103,74 @@ public class Match {
         LOGGER.info(LOG_SCORE_UPDATED, homeTeam, homeScore, awayTeam, awayScore);
     }
 
+    /**
+     * Gets the name of the home team.
+     *
+     * @return the name of the home team
+     */
     public String getHomeTeam() {
         return homeTeam;
     }
 
+    /**
+     * Gets the name of the away team.
+     *
+     * @return the name of the away team
+     */
     public String getAwayTeam() {
         return awayTeam;
     }
 
+    /**
+     * Gets the score of the home team.
+     *
+     * @return the home team's score
+     */
     public int getHomeScore() {
         return homeScore;
     }
 
+    /**
+     * Gets the score of the away team.
+     *
+     * @return the away team's score
+     */
     public int getAwayScore() {
         return awayScore;
     }
 
+    /**
+     * Gets the start time of the match.
+     *
+     * @return the start time of the match
+     */
     public LocalDateTime getStartTime() {
         return startTime;
     }
 
+    /**
+     * Creates a unique key representing the match between two teams.
+     * <p>
+     * The key is a lowercase string of the format "homeTeam vs awayTeam".
+     * </p>
+     *
+     * @param homeTeam the home team name
+     * @param awayTeam the away team name
+     * @return a unique match key
+     */
     public static String createMatchKey(String homeTeam, String awayTeam) {
         return (homeTeam + VS + awayTeam).toLowerCase();
     }
 
+    /**
+     * Validates the team name.
+     * <p>
+     * The team name must be alphanumeric and less than 50 characters.
+     * </p>
+     *
+     * @param teamName the name of the team to validate
+     * @throws TeamValidationException if the team name is invalid
+     */
     private void validateTeamName(String teamName) {
         if (!teamName.matches(TEAM_NAME_PATTERN)) {
             LOGGER.error(LOG_INVALID_TEAM_NAME, teamName);
@@ -120,6 +182,15 @@ public class Match {
         }
     }
 
+    /**
+     * Converts a string to CamelCase format.
+     * <p>
+     * This method capitalizes the first letter of each word and makes all others lowercase.
+     * </p>
+     *
+     * @param input the string to convert
+     * @return the CamelCase version of the input string
+     */
     private String toCamelCase(String input) {
         String[] words = input.split(" ");
         StringBuilder camelCaseString = new StringBuilder();
