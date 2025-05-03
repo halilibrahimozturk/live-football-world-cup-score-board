@@ -1,4 +1,4 @@
-package org.ozturk;
+package org.ozturk.service.impl;
 
 import org.ozturk.exception.MatchAlreadyExistsException;
 import org.ozturk.exception.MatchNotFoundException;
@@ -8,15 +8,20 @@ import org.ozturk.exception.TeamValidationException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.ozturk.model.Match;
+import org.ozturk.service.ScoreboardService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.stream.Collectors;
 
 /**
  * Scoreboard for managing football matches: creation, scoring, and summary.
+ *
+ * @author Halil Ibrahim Ozturk
  */
-public class Scoreboard {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Scoreboard.class);
+public class ScoreboardServiceImpl implements ScoreboardService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScoreboardServiceImpl.class);
 
     private final Map<String, Match> matchesInProgress;
 
@@ -36,29 +41,29 @@ public class Scoreboard {
     public static final String LOG_MATCH_NOT_FOUND_SCORE_UPDATE = "Score update failed - %s: %s vs %s";
     public static final String LOG_MATCH_NOT_FOUND_FINISH = "Finish failed - %s: %s vs %s";
 
-    // Separator
-    public static final String VS = "  vs  ";
-
-    public Scoreboard() {
+    public ScoreboardServiceImpl() {
         this.matchesInProgress = new LinkedHashMap<>();
     }
 
+    @Override
     public void startMatch(String homeTeam, String awayTeam) {
         validateNewMatch(homeTeam, awayTeam);
 
-        String key = createMatchKey(homeTeam, awayTeam);
+        String key = Match.createMatchKey(homeTeam, awayTeam);
 
         matchesInProgress.put(key, new Match(homeTeam, awayTeam));
     }
 
+    @Override
     public void updateScore(String homeTeam, String awayTeam, int homeScore, int awayScore) {
         Match match = getMatch(homeTeam, awayTeam);
 
         match.updateScore(homeScore, awayScore);
     }
 
+    @Override
     public void finishMatch(String homeTeam, String awayTeam) {
-        String key = createMatchKey(homeTeam, awayTeam);
+        String key = Match.createMatchKey(homeTeam, awayTeam);
 
         if (!matchesInProgress.containsKey(key)) {
             LOGGER.warn(String.format(LOG_MATCH_NOT_FOUND_FINISH, ERROR_MATCH_NOT_FOUND, homeTeam, awayTeam));
@@ -69,6 +74,7 @@ public class Scoreboard {
         matchesInProgress.remove(key);
     }
 
+    @Override
     public List<Match> getSummary() {
         LOGGER.info(LOG_SUMMARY_REQUESTED);
 
@@ -89,16 +95,12 @@ public class Scoreboard {
     }
 
     private Match getMatch(String homeTeam, String awayTeam) {
-        Match match = matchesInProgress.get(createMatchKey(homeTeam, awayTeam));
+        Match match = matchesInProgress.get(Match.createMatchKey(homeTeam, awayTeam));
         if (match == null) {
             LOGGER.warn(String.format(LOG_MATCH_NOT_FOUND_SCORE_UPDATE, ERROR_MATCH_NOT_FOUND, homeTeam, awayTeam));
             throw new MatchNotFoundException(ERROR_MATCH_NOT_FOUND);
         }
         return match;
-    }
-
-    private String createMatchKey(String homeTeam, String awayTeam) {
-        return (homeTeam + VS + awayTeam).toLowerCase();
     }
 
     private void validateNewMatch(String homeTeam, String awayTeam) {
@@ -107,7 +109,7 @@ public class Scoreboard {
             throw new TeamValidationException(ERROR_SAME_OR_NULL_TEAMS);
         }
 
-        if (matchesInProgress.containsKey(createMatchKey(homeTeam, awayTeam))) {
+        if (matchesInProgress.containsKey(Match.createMatchKey(homeTeam, awayTeam))) {
             LOGGER.warn(String.format(LOG_VALIDATION_FAILED_MATCH_EXISTS, ERROR_MATCH_EXISTS, homeTeam, awayTeam));
             throw new MatchAlreadyExistsException(ERROR_MATCH_EXISTS);
         }

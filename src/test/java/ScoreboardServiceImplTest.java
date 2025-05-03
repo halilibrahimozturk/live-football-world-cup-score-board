@@ -1,7 +1,8 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.ozturk.Match;
-import org.ozturk.Scoreboard;
+import org.ozturk.model.Match;
+import org.ozturk.service.ScoreboardService;
+import org.ozturk.service.impl.ScoreboardServiceImpl;
 import org.ozturk.exception.TeamValidationException;
 import org.ozturk.exception.MatchAlreadyExistsException;
 import org.ozturk.exception.InvalidScoreException;
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * This test class written following Test-Driven-Development (TDD) principles to implement
  * following basic functions and test edge cases of `Live Football World Cup Score Board`
- * Functions :
+ * Base Functions :
  * 1- Start a new match
  * 2- Update score
  * 3- Finish match
@@ -26,16 +27,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Halil Ibrahim Ozturk
  * @version 1.0
  */
-public class ScoreboardTest {
+public class ScoreboardServiceImplTest {
 
-    private Scoreboard scoreboard;
+    private ScoreboardService scoreboardService;
 
     /**
      * Initializes a new Scoreboard instance before each test.
      */
     @BeforeEach
     void setup() {
-        scoreboard = new Scoreboard();
+        scoreboardService = new ScoreboardServiceImpl();
     }
 
     /**
@@ -45,10 +46,10 @@ public class ScoreboardTest {
     @Test
     void shouldStartANewMatchWithZeroScores() {
         // Start match function
-        scoreboard.startMatch("Turkiye", "Norway");
+        scoreboardService.startMatch("Turkiye", "Norway");
 
         // There is only 1 match ongoing
-        List<Match> summary = scoreboard.getSummary();
+        List<Match> summary = scoreboardService.getSummary();
         assertEquals(1, summary.size());
 
         // First team assumed as home team
@@ -68,15 +69,15 @@ public class ScoreboardTest {
     @Test
     void shouldNotAllowNullTeamNamesInScoreboard() {
         assertThrows(TeamValidationException.class, () -> {
-            scoreboard.startMatch(null, "Norway");
+            scoreboardService.startMatch(null, "Norway");
         });
 
         assertThrows(TeamValidationException.class, () -> {
-            scoreboard.startMatch("Turkiye", null);
+            scoreboardService.startMatch("Turkiye", null);
         });
 
         assertThrows(TeamValidationException.class, () -> {
-            scoreboard.startMatch(null, null);
+            scoreboardService.startMatch(null, null);
         });
     }
 
@@ -103,10 +104,10 @@ public class ScoreboardTest {
      */
     @Test
     void shouldNotAllowDuplicateMatch() {
-        scoreboard.startMatch("Turkiye", "Norway");
+        scoreboardService.startMatch("Turkiye", "Norway");
 
         assertThrows(MatchAlreadyExistsException.class, () -> {
-            scoreboard.startMatch("Turkiye", "Norway");
+            scoreboardService.startMatch("Turkiye", "Norway");
         });
     }
 
@@ -116,9 +117,9 @@ public class ScoreboardTest {
      */
     @Test
     void shouldTreatTeamNamesCaseInsensitively() {
-        scoreboard.startMatch("Turkiye", "Norway");
+        scoreboardService.startMatch("Turkiye", "Norway");
         assertThrows(MatchAlreadyExistsException.class, () -> {
-            scoreboard.startMatch("turkiye", "norway");
+            scoreboardService.startMatch("turkiye", "norway");
         });
     }
 
@@ -129,7 +130,7 @@ public class ScoreboardTest {
     @Test
     void shouldNotAllowSameTeamAsHomeAndAway() {
         assertThrows(TeamValidationException.class, () -> {
-            scoreboard.startMatch("Turkiye", "Turkiye");
+            scoreboardService.startMatch("Turkiye", "Turkiye");
         });
     }
 
@@ -139,16 +140,16 @@ public class ScoreboardTest {
      */
     @Test
     void shouldNotAllowTeamToPlayInMoreThanOneMatch() {
-        scoreboard.startMatch("Turkiye", "Norway");
+        scoreboardService.startMatch("Turkiye", "Norway");
 
         // Turkiye is already playing
         assertThrows(TeamAlreadyPlayingException.class, () -> {
-            scoreboard.startMatch("Turkiye", "Sweden");
+            scoreboardService.startMatch("Turkiye", "Sweden");
         });
 
         // Norway is already playing
         assertThrows(TeamAlreadyPlayingException.class, () -> {
-            scoreboard.startMatch("Spain", "Norway");
+            scoreboardService.startMatch("Spain", "Norway");
         });
     }
 
@@ -158,12 +159,12 @@ public class ScoreboardTest {
      */
     @Test
     void shouldUpdateMatchScore() {
-        scoreboard.startMatch("Turkiye", "Norway");
+        scoreboardService.startMatch("Turkiye", "Norway");
 
         // Update score of match with scores
-        scoreboard.updateScore("Turkiye", "Norway", 1, 2);
+        scoreboardService.updateScore("Turkiye", "Norway", 1, 2);
 
-        Match match = scoreboard.getSummary().get(0);
+        Match match = scoreboardService.getSummary().get(0);
         assertEquals(1, match.getHomeScore());
         assertEquals(2, match.getAwayScore());
     }
@@ -174,21 +175,21 @@ public class ScoreboardTest {
      */
     @Test
     void shouldNotAllowNegativeScores() {
-        scoreboard.startMatch("Turkiye", "Norway");
+        scoreboardService.startMatch("Turkiye", "Norway");
 
         // Negative home score
         assertThrows(InvalidScoreException.class, () -> {
-            scoreboard.updateScore("Turkiye", "Norway", -1, 0);
+            scoreboardService.updateScore("Turkiye", "Norway", -1, 0);
         });
 
         // Negative away score
         assertThrows(InvalidScoreException.class, () -> {
-            scoreboard.updateScore("Turkiye", "Norway", 2, -3);
+            scoreboardService.updateScore("Turkiye", "Norway", 2, -3);
         });
 
         // Both scores negative
         assertThrows(InvalidScoreException.class, () -> {
-            scoreboard.updateScore("Turkiye", "Norway", -1, -1);
+            scoreboardService.updateScore("Turkiye", "Norway", -1, -1);
         });
     }
 
@@ -199,7 +200,7 @@ public class ScoreboardTest {
     @Test
     void shouldThrowExceptionWhenUpdatingNonExistingMatch() {
         assertThrows(MatchNotFoundException.class, () -> {
-            scoreboard.updateScore("Turkiye", "Norway", 1, 1);
+            scoreboardService.updateScore("Turkiye", "Norway", 1, 1);
         });
     }
 
@@ -209,11 +210,11 @@ public class ScoreboardTest {
      */
     @Test
     void shouldNotAllowScoreUpdateAfterMatchFinished() {
-        scoreboard.startMatch("Turkiye", "Norway");
-        scoreboard.finishMatch("Turkiye", "Norway");
+        scoreboardService.startMatch("Turkiye", "Norway");
+        scoreboardService.finishMatch("Turkiye", "Norway");
 
         assertThrows(MatchNotFoundException.class, () -> {
-            scoreboard.updateScore("Turkiye", "Norway", 1, 1);
+            scoreboardService.updateScore("Turkiye", "Norway", 1, 1);
         });
     }
 
@@ -222,11 +223,11 @@ public class ScoreboardTest {
      */
     @Test
     void shouldFinishMatchAndRemoveItFromScoreboard() {
-        scoreboard.startMatch("Turkiye", "Norway");
+        scoreboardService.startMatch("Turkiye", "Norway");
 
         // Finish the match by removing from summary list
-        scoreboard.finishMatch("Turkiye", "Norway");
-        assertTrue(scoreboard.getSummary().isEmpty());
+        scoreboardService.finishMatch("Turkiye", "Norway");
+        assertTrue(scoreboardService.getSummary().isEmpty());
     }
 
     /**
@@ -236,7 +237,7 @@ public class ScoreboardTest {
     @Test
     void shouldThrowExceptionWhenFinishingNonExistingMatch() {
         assertThrows(MatchNotFoundException.class, () -> {
-            scoreboard.finishMatch("Spain", "Brazil");
+            scoreboardService.finishMatch("Spain", "Brazil");
         });
     }
 
@@ -247,33 +248,33 @@ public class ScoreboardTest {
      */
     @Test
     void shouldSortMatchesByTotalScoreThenByRecency() throws InterruptedException {
-        scoreboard.startMatch("Turkiye", "Norway");
-        scoreboard.updateScore("Turkiye", "Norway", 5, 0);
+        scoreboardService.startMatch("Turkiye", "Norway");
+        scoreboardService.updateScore("Turkiye", "Norway", 5, 0);
 
         Thread.sleep(1); // To make a time differance
 
-        scoreboard.startMatch("Spain", "Brazil");
-        scoreboard.updateScore("Spain", "Brazil", 10, 2);
+        scoreboardService.startMatch("Spain", "Brazil");
+        scoreboardService.updateScore("Spain", "Brazil", 10, 2);
 
         Thread.sleep(1); // To make a time differance
 
-        scoreboard.startMatch("Germany", "France");
-        scoreboard.updateScore("Germany", "France", 2, 2);
+        scoreboardService.startMatch("Germany", "France");
+        scoreboardService.updateScore("Germany", "France", 2, 2);
 
         Thread.sleep(1); // To make a time differance
 
-        scoreboard.startMatch("Uruguay", "Italy");
-        scoreboard.updateScore("Uruguay", "Italy", 6, 6);
+        scoreboardService.startMatch("Uruguay", "Italy");
+        scoreboardService.updateScore("Uruguay", "Italy", 6, 6);
 
         Thread.sleep(1); // To make a time differance
 
-        scoreboard.startMatch("Argentina", "Australia");
-        scoreboard.updateScore("Argentina", "Australia", 3, 1);
+        scoreboardService.startMatch("Argentina", "Australia");
+        scoreboardService.updateScore("Argentina", "Australia", 3, 1);
 
         Thread.sleep(1); // To make a time differance
 
         // Get summary ordered by the most recently if the total score is equal
-        List<Match> summary = scoreboard.getSummary();
+        List<Match> summary = scoreboardService.getSummary();
 
         assertEquals("Uruguay", summary.get(0).getHomeTeam());    // 12 goals - most recent
         assertEquals("Spain", summary.get(1).getHomeTeam());      // 12 goals - earlier
@@ -287,7 +288,7 @@ public class ScoreboardTest {
      */
     @Test
     void summaryShouldBeEmptyWhenNoMatchesInProgress() {
-        assertTrue(scoreboard.getSummary().isEmpty());
+        assertTrue(scoreboardService.getSummary().isEmpty());
     }
 
 }

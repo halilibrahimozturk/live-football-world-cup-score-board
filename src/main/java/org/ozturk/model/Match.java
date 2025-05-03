@@ -1,4 +1,4 @@
-package org.ozturk;
+package org.ozturk.model;
 
 import org.ozturk.exception.InvalidScoreException;
 import org.ozturk.exception.TeamValidationException;
@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 /**
  * Represents a football match between two teams with score tracking and start time.
  * Immutable for team names and start time; mutable only for score updates.
+ *
+ * @author Halil Ibrahim Ozturk
  */
 public class Match {
     private static final Logger LOGGER = LoggerFactory.getLogger(Match.class);
@@ -28,6 +30,9 @@ public class Match {
     private static final String LOG_INVALID_TEAM_NAMES = "Invalid team names: homeTeam='{}', awayTeam='{}'";
     private static final String LOG_SCORE_UPDATE_ATTEMPT = "Attempted to update score with negative value: homeScore={}, awayScore={}";
     private static final String LOG_SCORE_UPDATED = "Score updated: {} {} - {} {}";
+
+    // Separator
+    public static final String VS = "  vs  ";
 
     /**
      * Constructs a Match with specified teams and default scores (0-0).
@@ -87,5 +92,9 @@ public class Match {
 
     public LocalDateTime getStartTime() {
         return startTime;
+    }
+
+    public static String createMatchKey(String homeTeam, String awayTeam) {
+        return (homeTeam + VS + awayTeam).toLowerCase();
     }
 }
