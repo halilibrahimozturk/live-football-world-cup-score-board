@@ -1,5 +1,7 @@
 package org.ozturk;
 
+import org.ozturk.exception.InvalidScoreException;
+import org.ozturk.exception.TeamValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
@@ -9,7 +11,7 @@ import java.time.LocalDateTime;
  * Immutable for team names and start time; mutable only for score updates.
  */
 public class Match {
-    private static final Logger logger = LoggerFactory.getLogger(Match.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Match.class);
 
     private final String homeTeam;
     private final String awayTeam;
@@ -32,12 +34,12 @@ public class Match {
      *
      * @param homeTeam home team name
      * @param awayTeam away team name
-     * @throws IllegalArgumentException if names are null or equal (ignoring case)
+     * @throws TeamValidationException if names are null or equal (ignoring case)
      */
     public Match(String homeTeam, String awayTeam) {
         if (homeTeam == null || awayTeam == null || homeTeam.equalsIgnoreCase(awayTeam)) {
-            logger.error(LOG_INVALID_TEAM_NAMES, homeTeam, awayTeam);
-            throw new IllegalArgumentException(ERROR_SAME_OR_NULL_TEAMS);
+            LOGGER.error(LOG_INVALID_TEAM_NAMES, homeTeam, awayTeam);
+            throw new TeamValidationException(ERROR_SAME_OR_NULL_TEAMS);
         }
 
         this.homeTeam = homeTeam;
@@ -46,7 +48,7 @@ public class Match {
         this.awayScore = 0;
         this.startTime = LocalDateTime.now();
 
-        logger.info(LOG_MATCH_CREATED, homeTeam, awayTeam, startTime);
+        LOGGER.info(LOG_MATCH_CREATED, homeTeam, awayTeam, startTime);
     }
 
     /**
@@ -54,17 +56,17 @@ public class Match {
      *
      * @param homeScore new home team score
      * @param awayScore new away team score
-     * @throws IllegalArgumentException if scores are negative
+     * @throws InvalidScoreException if scores are negative
      */
     public void updateScore(int homeScore, int awayScore) {
         if (homeScore < 0 || awayScore < 0) {
-            logger.error(LOG_SCORE_UPDATE_ATTEMPT, homeScore, awayScore);
-            throw new IllegalArgumentException(ERROR_NEGATIVE_SCORE);
+            LOGGER.error(LOG_SCORE_UPDATE_ATTEMPT, homeScore, awayScore);
+            throw new InvalidScoreException(ERROR_NEGATIVE_SCORE);
         }
 
         this.homeScore = homeScore;
         this.awayScore = awayScore;
-        logger.info(LOG_SCORE_UPDATED, homeTeam, homeScore, awayTeam, awayScore);
+        LOGGER.info(LOG_SCORE_UPDATED, homeTeam, homeScore, awayTeam, awayScore);
     }
 
     public String getHomeTeam() {

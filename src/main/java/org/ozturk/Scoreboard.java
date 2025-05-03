@@ -1,16 +1,22 @@
 package org.ozturk;
 
+import org.ozturk.exception.MatchAlreadyExistsException;
+import org.ozturk.exception.MatchNotFoundException;
+import org.ozturk.exception.TeamAlreadyPlayingException;
+import org.ozturk.exception.TeamValidationException;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.stream.Collectors;
 
 /**
  * Scoreboard for managing football matches: creation, scoring, and summary.
  */
 public class Scoreboard {
-    private static final Logger LOGGER = Logger.getLogger(Scoreboard.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(Scoreboard.class);
 
     private final Map<String, Match> matchesInProgress;
 
@@ -55,8 +61,8 @@ public class Scoreboard {
         String key = createMatchKey(homeTeam, awayTeam);
 
         if (!matchesInProgress.containsKey(key)) {
-            LOGGER.warning(String.format(LOG_MATCH_NOT_FOUND_FINISH, ERROR_MATCH_NOT_FOUND, homeTeam, awayTeam));
-            throw new IllegalArgumentException(ERROR_MATCH_NOT_FOUND);
+            LOGGER.warn(String.format(LOG_MATCH_NOT_FOUND_FINISH, ERROR_MATCH_NOT_FOUND, homeTeam, awayTeam));
+            throw new MatchNotFoundException(ERROR_MATCH_NOT_FOUND);
         }
 
         LOGGER.info(String.format(LOG_FINISHING_MATCH, homeTeam, awayTeam));
@@ -85,8 +91,8 @@ public class Scoreboard {
     private Match getMatch(String homeTeam, String awayTeam) {
         Match match = matchesInProgress.get(createMatchKey(homeTeam, awayTeam));
         if (match == null) {
-            LOGGER.warning(String.format(LOG_MATCH_NOT_FOUND_SCORE_UPDATE, ERROR_MATCH_NOT_FOUND, homeTeam, awayTeam));
-            throw new IllegalArgumentException(ERROR_MATCH_NOT_FOUND);
+            LOGGER.warn(String.format(LOG_MATCH_NOT_FOUND_SCORE_UPDATE, ERROR_MATCH_NOT_FOUND, homeTeam, awayTeam));
+            throw new MatchNotFoundException(ERROR_MATCH_NOT_FOUND);
         }
         return match;
     }
@@ -97,13 +103,13 @@ public class Scoreboard {
 
     private void validateNewMatch(String homeTeam, String awayTeam) {
         if (homeTeam == null || awayTeam == null || homeTeam.equalsIgnoreCase(awayTeam)) {
-            LOGGER.warning(String.format(LOG_VALIDATION_FAILED_SAME_OR_NULL_TEAMS, ERROR_SAME_OR_NULL_TEAMS, homeTeam, awayTeam));
-            throw new IllegalArgumentException(ERROR_SAME_OR_NULL_TEAMS);
+            LOGGER.warn(String.format(LOG_VALIDATION_FAILED_SAME_OR_NULL_TEAMS, ERROR_SAME_OR_NULL_TEAMS, homeTeam, awayTeam));
+            throw new TeamValidationException(ERROR_SAME_OR_NULL_TEAMS);
         }
 
         if (matchesInProgress.containsKey(createMatchKey(homeTeam, awayTeam))) {
-            LOGGER.warning(String.format(LOG_VALIDATION_FAILED_MATCH_EXISTS, ERROR_MATCH_EXISTS, homeTeam, awayTeam));
-            throw new IllegalArgumentException(ERROR_MATCH_EXISTS);
+            LOGGER.warn(String.format(LOG_VALIDATION_FAILED_MATCH_EXISTS, ERROR_MATCH_EXISTS, homeTeam, awayTeam));
+            throw new MatchAlreadyExistsException(ERROR_MATCH_EXISTS);
         }
 
         boolean homePlaying = matchesInProgress.values().stream()
@@ -112,8 +118,8 @@ public class Scoreboard {
                 .anyMatch(m -> m.getHomeTeam().equalsIgnoreCase(awayTeam) || m.getAwayTeam().equalsIgnoreCase(awayTeam));
 
         if (homePlaying || awayPlaying) {
-            LOGGER.warning(String.format(LOG_VALIDATION_FAILED_TEAM_ALREADY_PLAYING, ERROR_TEAM_ALREADY_PLAYING, homeTeam, awayTeam));
-            throw new IllegalArgumentException(ERROR_TEAM_ALREADY_PLAYING);
+            LOGGER.warn(String.format(LOG_VALIDATION_FAILED_TEAM_ALREADY_PLAYING, ERROR_TEAM_ALREADY_PLAYING, homeTeam, awayTeam));
+            throw new TeamAlreadyPlayingException(ERROR_TEAM_ALREADY_PLAYING);
         }
     }
 }

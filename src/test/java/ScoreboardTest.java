@@ -2,6 +2,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.ozturk.Match;
 import org.ozturk.Scoreboard;
+import org.ozturk.exception.TeamValidationException;
+import org.ozturk.exception.MatchAlreadyExistsException;
+import org.ozturk.exception.InvalidScoreException;
+import org.ozturk.exception.MatchNotFoundException;
+import org.ozturk.exception.TeamAlreadyPlayingException;
 
 import java.util.List;
 
@@ -62,15 +67,15 @@ public class ScoreboardTest {
      */
     @Test
     void shouldNotAllowNullTeamNamesInScoreboard() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(TeamValidationException.class, () -> {
             scoreboard.startMatch(null, "Norway");
         });
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(TeamValidationException.class, () -> {
             scoreboard.startMatch("Turkiye", null);
         });
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(TeamValidationException.class, () -> {
             scoreboard.startMatch(null, null);
         });
     }
@@ -80,15 +85,15 @@ public class ScoreboardTest {
      */
     @Test
     void shouldNotAllowNullTeamNamesInMatch() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(TeamValidationException.class, () -> {
             new Match(null, "Norway");
         });
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(TeamValidationException.class, () -> {
             new Match("Turkiye", null);
         });
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(TeamValidationException.class, () -> {
             new Match(null, null);
         });
     }
@@ -100,7 +105,7 @@ public class ScoreboardTest {
     void shouldNotAllowDuplicateMatch() {
         scoreboard.startMatch("Turkiye", "Norway");
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(MatchAlreadyExistsException.class, () -> {
             scoreboard.startMatch("Turkiye", "Norway");
         });
     }
@@ -112,7 +117,7 @@ public class ScoreboardTest {
     @Test
     void shouldTreatTeamNamesCaseInsensitively() {
         scoreboard.startMatch("Turkiye", "Norway");
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(MatchAlreadyExistsException.class, () -> {
             scoreboard.startMatch("turkiye", "norway");
         });
     }
@@ -123,7 +128,7 @@ public class ScoreboardTest {
      */
     @Test
     void shouldNotAllowSameTeamAsHomeAndAway() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(TeamValidationException.class, () -> {
             scoreboard.startMatch("Turkiye", "Turkiye");
         });
     }
@@ -137,12 +142,12 @@ public class ScoreboardTest {
         scoreboard.startMatch("Turkiye", "Norway");
 
         // Turkiye is already playing
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(TeamAlreadyPlayingException.class, () -> {
             scoreboard.startMatch("Turkiye", "Sweden");
         });
 
         // Norway is already playing
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(TeamAlreadyPlayingException.class, () -> {
             scoreboard.startMatch("Spain", "Norway");
         });
     }
@@ -172,17 +177,17 @@ public class ScoreboardTest {
         scoreboard.startMatch("Turkiye", "Norway");
 
         // Negative home score
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidScoreException.class, () -> {
             scoreboard.updateScore("Turkiye", "Norway", -1, 0);
         });
 
         // Negative away score
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidScoreException.class, () -> {
             scoreboard.updateScore("Turkiye", "Norway", 2, -3);
         });
 
         // Both scores negative
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidScoreException.class, () -> {
             scoreboard.updateScore("Turkiye", "Norway", -1, -1);
         });
     }
@@ -193,7 +198,7 @@ public class ScoreboardTest {
      */
     @Test
     void shouldThrowExceptionWhenUpdatingNonExistingMatch() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(MatchNotFoundException.class, () -> {
             scoreboard.updateScore("Turkiye", "Norway", 1, 1);
         });
     }
@@ -207,7 +212,7 @@ public class ScoreboardTest {
         scoreboard.startMatch("Turkiye", "Norway");
         scoreboard.finishMatch("Turkiye", "Norway");
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(MatchNotFoundException.class, () -> {
             scoreboard.updateScore("Turkiye", "Norway", 1, 1);
         });
     }
@@ -230,7 +235,7 @@ public class ScoreboardTest {
      */
     @Test
     void shouldThrowExceptionWhenFinishingNonExistingMatch() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(MatchNotFoundException.class, () -> {
             scoreboard.finishMatch("Spain", "Brazil");
         });
     }
