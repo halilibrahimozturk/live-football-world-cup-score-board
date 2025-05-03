@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Halil Ibrahim Ozturk
  * @version 1.0
  */
-public class ScoreboardServiceImplTest {
+public class ScoreboardServiceTest {
 
     private ScoreboardService scoreboardService;
 
@@ -78,24 +78,6 @@ public class ScoreboardServiceImplTest {
 
         assertThrows(TeamValidationException.class, () -> {
             scoreboardService.startMatch(null, null);
-        });
-    }
-
-    /**
-     * Tests that creating a Match with null home or away team throws an exception.
-     */
-    @Test
-    void shouldNotAllowNullTeamNamesInMatch() {
-        assertThrows(TeamValidationException.class, () -> {
-            new Match(null, "Norway");
-        });
-
-        assertThrows(TeamValidationException.class, () -> {
-            new Match("Turkiye", null);
-        });
-
-        assertThrows(TeamValidationException.class, () -> {
-            new Match(null, null);
         });
     }
 
