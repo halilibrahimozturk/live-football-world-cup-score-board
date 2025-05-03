@@ -36,3 +36,31 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# Node modules
+/node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+/build/
+
+# Dependency directories
+/.pnp
+.pnp.js
+
+# dotenv environment variables file
+.env
+
+# Windows system files
+Thumbs.db
+
+# IDE specific files
+.idea/
+
+# Package lock files (optional)
+package-lock.json
+yarn.lock

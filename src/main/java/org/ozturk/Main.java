@@ -3,46 +3,44 @@ package org.ozturk;
 import org.ozturk.model.Match;
 import org.ozturk.service.ScoreboardService;
 import org.ozturk.service.impl.ScoreboardServiceImpl;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.List;
 
+@SpringBootApplication
 public class Main {
     public static void main(String[] args) {
-        System.out.printf("\nHello! This is `Live Football World Cup Score Board`!\n");
+        SpringApplication.run(Main.class, args);
 
-        //  Simulate use of `Live Football World Cup Score Board` Library
-        ScoreboardService scoreboardService = new ScoreboardServiceImpl();
+        ScoreboardService scoreboard = new ScoreboardServiceImpl();
 
         // Start matches
-        scoreboardService.startMatch("Turkiye", "Norway");
-        scoreboardService.startMatch("Spain", "Brazil");
-        scoreboardService.startMatch("Germany", "France");
-        scoreboardService.startMatch("Uruguay", "Italy");
-        scoreboardService.startMatch("Argentina", "Australia");
+        scoreboard.startMatch("Turkiye", "Norway");
+        scoreboard.startMatch("Germany", "France");
+        scoreboard.startMatch("Spain", "Italy");
 
         // Update scores
-        scoreboardService.updateScore("Turkiye", "Norway", 0, 5);
-        scoreboardService.updateScore("Spain", "Brazil", 10, 2);
-        scoreboardService.updateScore("Germany", "France", 2, 2);
-        scoreboardService.updateScore("Uruguay", "Italy", 6, 6);
-        scoreboardService.updateScore("Argentina", "Australia", 3, 1);
+        scoreboard.updateScore("Turkiye", "Norway", 2, 1);
+        scoreboard.updateScore("Germany", "France", 1, 1);
+        scoreboard.updateScore("Spain", "Italy", 3, 2);
 
-        // Print summary
-        System.out.println("\n=== Match Summary ===");
-        List<Match> summary = scoreboardService.getSummary();
-        for (Match match : summary) {
-            System.out.println(match.getHomeTeam() + " " + match.getHomeScore() + " - " +
-                    match.getAwayTeam() + " " + match.getAwayScore());
-        }
+        // Print current summary
+        System.out.println("\n--- Current Matches ---");
+        printMatches(scoreboard.getSummary());
 
         // Finish a match
-        scoreboardService.finishMatch("Germany", "France");
+        scoreboard.finishMatch("Germany", "France");
 
-        System.out.println("\n=== After Finishing Germany vs France ===");
-        summary = scoreboardService.getSummary();
-        for (Match match : summary) {
+        // Print updated summary
+        System.out.println("\n--- Matches After Finishing One ---");
+        printMatches(scoreboard.getSummary());
+    }
+
+    private static void printMatches(List<Match> matches) {
+        for (Match match : matches) {
             System.out.println(match.getHomeTeam() + " " + match.getHomeScore() + " - " +
-                    match.getAwayTeam() + " " + match.getAwayScore());
+                    match.getAwayScore() + " " + match.getAwayTeam());
         }
     }
 }
