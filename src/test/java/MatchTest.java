@@ -43,4 +43,45 @@ public class MatchTest {
         assertEquals(0, match.getHomeScore());
         assertEquals(0, match.getAwayScore());
     }
+
+    /**
+     * Test case to ensure that special characters are not allowed in team names.
+     * It checks that a TeamValidationException is thrown when special characters
+     * like "!" and "@" or "$" and "%" are included in the team names.
+     */
+    @Test
+    void shouldNotAllowSpecialCharactersInTeamNames() {
+        assertThrows(TeamValidationException.class, () -> {
+            new Match("Turkiye!@", "Norway");
+        });
+
+        assertThrows(TeamValidationException.class, () -> {
+            new Match("Turkiye", "Norway$%");
+        });
+    }
+
+    /**
+     * Test case to ensure that team names do not exceed the maximum allowed length.
+     * It checks that a TeamValidationException is thrown when the team name exceeds 50 characters.
+     * In this case, the team name is set to 51 characters long.
+     */
+    @Test
+    void shouldEnforceMaxTeamNameLength() {
+        String longTeamName = "A".repeat(51); // 51 characters long
+        assertThrows(TeamValidationException.class, () -> {
+            new Match(longTeamName, "Norway");
+        });
+    }
+
+    /**
+     * Test case to ensure that team names are properly converted to camel case format.
+     * It checks that team names like "turkIYE" and "nOrway" are correctly converted to "Turkiye" and "Norway"
+     * when assigned to the Match object.
+     */
+    @Test
+    void shouldConvertTeamNamesToCamelCase() {
+        Match match = new Match("turkIYE", "nOrway");
+        assertEquals("Turkiye", match.getHomeTeam());
+        assertEquals("Norway", match.getAwayTeam());
+    }
 }
